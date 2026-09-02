@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: msal-api
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Directory (tenant) ID — el mismo VITE_TENANT_ID de msal-front.
+          issuer-uri: https://login.microsoftonline.com/https://login.microsoftonline.com/95cd823a-c239-4ece-b6ea-932724964971/v2.0

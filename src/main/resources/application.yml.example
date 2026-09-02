@@ -1,0 +1,13 @@
+# Copia los valores a application.yml. No subas GUIDs del aula al repositorio.
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: msal-api
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/v2.0
