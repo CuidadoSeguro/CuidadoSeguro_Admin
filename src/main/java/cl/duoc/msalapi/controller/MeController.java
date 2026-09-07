@@ -23,6 +23,7 @@ public class MeController {
 		body.put("preferred_username", jwt.getClaimAsString("preferred_username"));
 		body.put("oid", jwt.getClaimAsString("oid"));
 		body.put("iss", jwt.getIssuer() != null ? jwt.getIssuer().toString() : null);
+		body.put("roles",jwt.getClaim("roles"));
 		return body;
 	}
 }

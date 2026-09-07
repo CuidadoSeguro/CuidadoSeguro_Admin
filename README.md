@@ -315,6 +315,10 @@ Detén con `Ctrl+C`.
 
 **Próxima clase:** Expose an API (`api://…/access_as_user`) y `audiences` en Spring, para que un token de Graph **ya no** sirva: el pase tiene que ser **para tu API**.
 
+**Integración con el front:** cuando el back funcione con Postman/curl, sigue **`../msal-front/GUIA_INTEGRACION.md`** para conectar React con `/public/hola` y `/api/me`.
+
+**Access token real:** después de la integración básica, sigue **`../GUIA_ACCESS_TOKEN.md`** (PDF: `GUIA_ACCESS_TOKEN.pdf`) para Expose an API y `audiences`.
+
 ---
 
 ## Si algo falla
