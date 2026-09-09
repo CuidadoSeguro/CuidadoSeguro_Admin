@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class MeController {
 
-	@GetMapping("/me")
+	@GetMapping("/login")
 	public Map<String, Object> me(@AuthenticationPrincipal Jwt jwt) {
 		Map<String, Object> body = new LinkedHashMap<>();
 		body.put("mensaje", "API privada: el access token es válido.");
