@@ -16,31 +16,64 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
 
-	@Bean
-	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
-				.csrf(AbstractHttpConfigurer::disable)
-				.cors(Customizer.withDefaults())
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.requestMatchers("/public/**").permitAll()
-						.requestMatchers("/api/**").authenticated()
-						.anyRequest().denyAll())
-				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-		return http.build();
-	}
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-	@Bean
-	CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration cfg = new CorsConfiguration();
-		cfg.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:4200"));
-		cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin"));
-		cfg.setAllowCredentials(true);
-		cfg.setMaxAge(3600L);
+        http
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(Customizer.withDefaults())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/public/**").permitAll()
+                .requestMatchers("/api/**").authenticated()
+                .anyRequest().denyAll()
+            )
+            .oauth2ResourceServer(oauth2 ->
+                oauth2.jwt(Customizer.withDefaults())
+            );
 
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", cfg);
-		return source;
-	}
+        return http.build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration cfg = new CorsConfiguration();
+
+        cfg.setAllowedOrigins(
+            List.of(
+                "http://localhost:5173",
+                "http://localhost:4200"
+            )
+        );
+
+        cfg.setAllowedMethods(
+            List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "OPTIONS"
+            )
+        );
+
+        cfg.setAllowedHeaders(
+            List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin"
+            )
+        );
+
+        cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", cfg);
+
+        return source;
+    }
 }

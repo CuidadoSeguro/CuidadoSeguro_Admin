@@ -4,14 +4,29 @@ server:
 spring:
   application:
     name: msal-api
+
+  datasource:
+    url: jdbc:h2:mem:cuidadoseguro
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    defer-datasource-initialization: true
+
+  h2:
+    console:
+      enabled: true
+
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: https://login.microsoftonline.com/95cd823a-c239-4ece-b6ea-932724964971/v2.0
-          # GUID (v2.0) y Application ID URI.
           audiences:
-            - api://3912eb25-8b20-4725-9b9d-18a99c419ead
             - 3912eb25-8b20-4725-9b9d-18a99c419ead
 
 logging:
