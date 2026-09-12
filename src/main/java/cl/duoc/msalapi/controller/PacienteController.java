@@ -64,6 +64,13 @@ public class PacienteController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
+        String rut = paciente.getRut().trim();
+
+        if (repository.existsByRutIgnoreCase(rut)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
+        paciente.setRut(rut);
         Paciente guardado = repository.save(paciente);
 
         return ResponseEntity
@@ -81,10 +88,21 @@ public class PacienteController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
+        String rut = datos.getRut().trim();
+
         return repository.findById(id)
                 .map(paciente -> {
+                    boolean rutDuplicado = repository.existsByRutIgnoreCase(rut)
+                            && !paciente.getRut().equalsIgnoreCase(rut);
+
+                    if (rutDuplicado) {
+                        throw new ResponseStatusException(
+                                HttpStatus.CONFLICT,
+                                "Ya existe un paciente con ese RUT");
+                    }
+
                     paciente.setNombreCompleto(datos.getNombreCompleto());
-                    paciente.setRut(datos.getRut());
+                    paciente.setRut(rut);
                     paciente.setEmail(datos.getEmail());
                     paciente.setTelefono(datos.getTelefono());
                     paciente.setDiagnostico(datos.getDiagnostico());

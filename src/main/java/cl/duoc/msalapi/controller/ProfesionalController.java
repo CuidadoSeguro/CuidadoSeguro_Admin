@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import cl.duoc.msalapi.entity.Profesional;
 import cl.duoc.msalapi.repository.ProfesionalRepository;
@@ -64,6 +65,13 @@ public class ProfesionalController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
+        String rut = profesional.getRut().trim();
+
+        if (repository.existsByRutIgnoreCase(rut)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
+        profesional.setRut(rut);
         Profesional guardado = repository.save(profesional);
 
         return ResponseEntity
@@ -81,10 +89,21 @@ public class ProfesionalController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
+        String rut = datos.getRut().trim();
+
         return repository.findById(id)
                 .map(profesional -> {
+                    boolean rutDuplicado = repository.existsByRutIgnoreCase(rut)
+                            && !profesional.getRut().equalsIgnoreCase(rut);
+
+                    if (rutDuplicado) {
+                        throw new ResponseStatusException(
+                                HttpStatus.CONFLICT,
+                                "Ya existe un profesional con ese RUT");
+                    }
+
                     profesional.setNombreCompleto(datos.getNombreCompleto());
-                    profesional.setRut(datos.getRut());
+                    profesional.setRut(rut);
                     profesional.setEspecialidad(datos.getEspecialidad());
                     profesional.setEmail(datos.getEmail());
                     profesional.setTelefono(datos.getTelefono());

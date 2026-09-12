@@ -33,11 +33,11 @@ public class PublicController {
 
 	@GetMapping("/countPacientes")
     public ResponseEntity<Integer> countPacientes() {
-        return ResponseEntity.ok(repository.findAll().size());
+        return ResponseEntity.ok((int)repository.count());
     }
 	
 	@GetMapping("/countProfesionales")
 	public ResponseEntity<Integer> countProfesionales() {
-		return ResponseEntity.ok(profesionalRepository.findAll().size());
+		return ResponseEntity.ok((int) profesionalRepository.count());
 	}
 }
