@@ -315,6 +315,10 @@ Detén con `Ctrl+C`.
 
 **Próxima clase:** Expose an API (`api://…/access_as_user`) y `audiences` en Spring, para que un token de Graph **ya no** sirva: el pase tiene que ser **para tu API**.
 
+**Integración con el front:** cuando el back funcione con Postman/curl, sigue **`../msal-front/GUIA_INTEGRACION.md`** para conectar React con `/public/hola` y `/api/me`.
+
+**Access token real:** después de la integración básica, sigue **`../GUIA_ACCESS_TOKEN.md`** (PDF: `GUIA_ACCESS_TOKEN.pdf`) para Expose an API y `audiences`.
+
 ---
 
 ## Si algo falla
@@ -340,3 +344,65 @@ cd msal-api
 curl http://localhost:8080/public/hola
 curl -i http://localhost:8080/api/me
 ```
+
+---
+
+## Despliegue con Docker y GitHub Actions
+
+### Variables de entorno de la aplicación
+
+Toda la configuración sale de variables de entorno (ver `.env.example`); el repositorio no contiene GUIDs ni credenciales.
+
+| Variable | Descripción | Default |
+|---|---|---|
+| `SERVER_PORT` | Puerto HTTP del servicio | `8080` |
+| `DB_HOST` / `DB_PORT` / `DB_NAME` | Conexión MySQL | `localhost` / `3306` / `cuidadoseguro` |
+| `DB_USERNAME` / `DB_PASSWORD` | Credenciales MySQL | `root` / vacío |
+| `DB_USE_SSL` | `useSSL` en la URL JDBC | `false` |
+| `JPA_DDL_AUTO` | Estrategia Hibernate | `update` |
+| `SQL_INIT_MODE` | `always` para cargar `data.sql` | `never` |
+| `AZURE_ISSUER_URI` | `https://login.microsoftonline.com/<tenant-id>/v2.0` | placeholder |
+| `AZURE_CLIENT_ID` | Audience esperada del access token | placeholder |
+| `CORS_ALLOWED_ORIGINS` | Orígenes permitidos, separados por coma | `http://localhost:5173,http://localhost:4200` |
+| `LOG_LEVEL_OAUTH2` | Nivel de log OAuth2 | `INFO` |
+
+### Local con Docker
+
+```bash
+cp .env.example .env   # completa los valores
+docker compose up --build
+curl http://localhost:8080/public/hola
+```
+
+### Secrets de GitHub Actions
+
+`Settings → Secrets and variables → Actions → New repository secret`:
+
+| Secret | Para qué |
+|---|---|
+| `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` | Publicar la imagen en Docker Hub |
+| `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` | Credenciales AWS (la sesión solo si son temporales, tipo AWS Academy) |
+| `ECS_CLUSTER`, `ECS_SERVICE` | Cluster y servicio ECS destino |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` | Conexión MySQL del contenedor desplegado |
+| `AZURE_ISSUER_URI`, `AZURE_CLIENT_ID` | Validación del JWT de Entra ID |
+| `CORS_ALLOWED_ORIGINS` | Orígenes del front en producción |
+
+Variables (`Settings → Variables`):
+
+| Variable | Para qué |
+|---|---|
+| `ENABLE_ECS_DEPLOY` | `true` habilita el job de despliegue a ECS |
+| `AWS_REGION` | Región AWS (por defecto `us-east-1`) |
+
+### Pipeline
+
+El workflow está en `deploy/ci-cd.yml`; cópialo a `.github/workflows/ci-cd.yml` para que GitHub Actions lo ejecute:
+
+```bash
+cp deploy/ci-cd.yml .github/workflows/ci-cd.yml
+```
+
+Qué hace:
+
+1. **Docker Build & Push** — construye la imagen (multi-stage, Java 21, sin tests) y la publica en Docker Hub con tags `sha-<commit>` y `latest`.
+2. **Deploy a ECS** — solo si `ENABLE_ECS_DEPLOY = true`: toma la task definition que ya usa el servicio (familia, rol, red y logs se reutilizan tal cual), le cambia la imagen y las variables de entorno con los secrets, la registra y fuerza un nuevo deployment.
