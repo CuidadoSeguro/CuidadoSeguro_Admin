@@ -24,9 +24,9 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://login.microsoftonline.com/95cd823a-c239-4ece-b6ea-932724964971/v2.0
+          issuer-uri: ${AZURE_ISSUER_URI:https://login.microsoftonline.com/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/v2.0}
           audiences:
-            - 3912eb25-8b20-4725-9b9d-18a99c419ead
+            - ${AZURE_CLIENT_ID:00000000-0000-0000-0000-000000000000}
 
 logging:
   level:
