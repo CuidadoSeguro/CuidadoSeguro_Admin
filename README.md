@@ -344,3 +344,66 @@ cd msal-api
 curl http://localhost:8080/public/hola
 curl -i http://localhost:8080/api/me
 ```
+
+
+---
+
+## Perfiles local y producción
+
+La API utiliza perfiles de Spring Boot separados:
+
+- **`local`**: es el perfil predeterminado. Lee variables del entorno y, si existen, del archivo `.env` de la raíz del proyecto. Tiene valores de desarrollo para el puerto, la base de datos local y Entra ID.
+- **`prod`**: no usa valores predeterminados para credenciales, tenant/audience ni base de datos. Debes entregarlos mediante variables de entorno o GitHub Secrets al ejecutar/desplegar la aplicación. Hibernate valida el esquema (`ddl-auto: validate`) en vez de modificarlo automáticamente.
+
+### Desarrollo local
+
+1. Copia `.env.example` a `.env`.
+2. Ajusta `DB_NAME`, `DB_USERNAME` y `DB_PASSWORD` a tu MySQL local.
+3. Ejecuta:
+
+```bash
+./mvnw spring-boot:run
+```
+
+Para elegir el perfil explícitamente:
+
+```bash
+# PowerShell
+$env:SPRING_PROFILES_ACTIVE="local"
+.\mvnw spring-boot:run
+
+# Bash
+SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
+```
+
+`.env` está excluido de Git. Solo se versiona `.env.example`, sin contraseñas reales.
+
+### Producción / GitHub
+
+Configura estos valores como **GitHub Actions Secrets** (Settings → Secrets and variables → Actions) y pásalos al entorno donde se ejecuta la aplicación:
+
+- `DB_URL` (opcional si usas `DB_HOST`, `DB_PORT` y `DB_NAME`)
+- `DB_HOST`, `DB_PORT`, `DB_NAME`
+- `DB_USERNAME`, `DB_PASSWORD`
+- `ENTRA_ISSUER_URI`
+- `ENTRA_API_AUDIENCE`
+
+Activa el perfil de producción con `SPRING_PROFILES_ACTIVE=prod`. También puedes configurar `SERVER_PORT` y `SECURITY_LOG_LEVEL`.
+
+**Importante:** un runner de GitHub no puede leer el `.env` de tu computador. La aplicación lee `.env` localmente durante el desarrollo; en GitHub Actions debes proporcionar los Secrets al job/deployment o configurar las variables en el servicio de ejecución. No pongas contraseñas en el YAML del workflow ni en el repositorio.
+
+Ejemplo de paso de variables a una ejecución de aplicación desde GitHub Actions:
+
+```yaml
+env:
+  SPRING_PROFILES_ACTIVE: prod
+  DB_HOST: ${{ secrets.DB_HOST }}
+  DB_PORT: ${{ secrets.DB_PORT }}
+  DB_NAME: ${{ secrets.DB_NAME }}
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  ENTRA_ISSUER_URI: ${{ secrets.ENTRA_ISSUER_URI }}
+  ENTRA_API_AUDIENCE: ${{ secrets.ENTRA_API_AUDIENCE }}
+```
+
+Este bloque debe estar en el job o paso que realmente arranca/despliega la API; por sí solo no crea un despliegue.

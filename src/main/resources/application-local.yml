@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:msal_api}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ENTRA_ISSUER_URI:https://login.microsoftonline.com/95cd823a-c239-4ece-b6ea-932724964971/v2.0}
+          audiences:
+            - ${ENTRA_API_AUDIENCE:3912eb25-8b20-4725-9b9d-18a99c419ead}
+
+logging:
+  level:
+    org.springframework.security.oauth2: ${SECURITY_LOG_LEVEL:DEBUG}

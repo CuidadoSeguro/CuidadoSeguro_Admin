@@ -1,33 +1,11 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 spring:
   application:
     name: msal-api
-
-  datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    open-in-view: false
-    defer-datasource-initialization: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://login.microsoftonline.com/95cd823a-c239-4ece-b6ea-932724964971/v2.0
-          audiences:
-            - 3912eb25-8b20-4725-9b9d-18a99c419ead
-
-logging:
-  level:
-    org.springframework.security.oauth2: DEBUG
+  config:
+    # Lee .env en desarrollo local si existe. En GitHub/AWS se usan variables de entorno/Secrets.
+    import: optional:file:.env[.properties]
+  profiles:
+    default: local

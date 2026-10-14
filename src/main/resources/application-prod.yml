@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    # En producción configura DB_URL o DB_HOST, DB_PORT, DB_NAME y credenciales en Secrets/variables del entorno.
+    url: ${DB_URL:jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}?useSSL=true&serverTimezone=UTC}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ENTRA_ISSUER_URI}
+          audiences:
+            - ${ENTRA_API_AUDIENCE}
+
+logging:
+  level:
+    org.springframework.security.oauth2: ${SECURITY_LOG_LEVEL:INFO}
