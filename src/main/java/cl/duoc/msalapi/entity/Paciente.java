@@ -38,6 +38,9 @@ public class Paciente {
     @Column(name = "estado")
     private String estado;
 
+    @Column(name = "fecha_nacimiento")
+    private String fechaNacimiento;
+
     public Long getId() { return id; }
     public String getNombreCompleto() { return nombreCompleto; }
     public void setNombreCompleto(String nombreCompleto) { this.nombreCompleto = nombreCompleto; }
@@ -51,4 +54,6 @@ public class Paciente {
     public void setDiagnostico(String diagnostico) { this.diagnostico = diagnostico; }
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+    public String getFechaNacimiento() { return fechaNacimiento; }
+    public void setFechaNacimiento(String fechaNacimiento) { this.fechaNacimiento = fechaNacimiento; }
 }

@@ -107,6 +107,7 @@ public class PacienteController {
                     paciente.setTelefono(datos.getTelefono());
                     paciente.setDiagnostico(datos.getDiagnostico());
                     paciente.setEstado(datos.getEstado());
+                    paciente.setFechaNacimiento(datos.getFechaNacimiento());
 
                     return ResponseEntity.ok(repository.save(paciente));
                 })
