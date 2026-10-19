@@ -19,7 +19,7 @@ public class FichaClinicaService {
 
     public FichaClinicaService(
             RestClient.Builder builder,
-            @Value("${queues.service.base-url:http://localhost:8086}") String queuesServiceBaseUrl) {
+            @Value("${queues.service.base-url:http://cuidadoseguro-queue-cf502d50d1881b7f.elb.us-east-1.amazonaws.com:8086}") String queuesServiceBaseUrl) {
         this.queuesClient = builder.baseUrl(queuesServiceBaseUrl).build();
     }
 
