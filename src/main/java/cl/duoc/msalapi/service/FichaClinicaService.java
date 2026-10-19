@@ -15,14 +15,16 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class FichaClinicaService {
 
+
+    private static final String QUEUES_SERVICE_BASE_URL = "http://cuidadoseguro-queue-cf502d50d1881b7f.elb.us-east-1.amazonaws.com:8086";
     private final RestClient queuesClient;
 
-    public FichaClinicaService(
-            RestClient.Builder builder,
-            @Value("${queues.service.base-url:http://cuidadoseguro-queue-cf502d50d1881b7f.elb.us-east-1.amazonaws.com:8086}") String queuesServiceBaseUrl) {
-        this.queuesClient = builder.baseUrl(queuesServiceBaseUrl).build();
+    // Constructor simplificado recibiendo únicamente el RestClient.Builder
+    public FichaClinicaService(RestClient.Builder builder) {
+        this.queuesClient = builder
+                .baseUrl(QUEUES_SERVICE_BASE_URL)
+                .build();
     }
-
     public SolicitudPdfResponse solicitar(Paciente paciente, String correoDestino) {
         boolean enviarCorreo = correoDestino != null && !correoDestino.isBlank();
 
