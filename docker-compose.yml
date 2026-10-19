@@ -14,7 +14,7 @@ services:
       AZURE_ISSUER_URI: ${AZURE_ISSUER_URI}
       AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:4200}
-      QUEUES_SERVICE_URL: ${QUEUES_SERVICE_URL:-http://host.docker.internal:8086}
+      QUEUES_SERVICE_URL: ${QUEUES_SERVICE_URL:-http://cuidadoseguro-queue-cf502d50d1881b7f.elb.us-east-1.amazonaws.com:8086}
     depends_on:
       mysql:
         condition: service_healthy
