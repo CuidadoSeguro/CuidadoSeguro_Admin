@@ -6,10 +6,10 @@ spring:
     name: msal-api
 
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:cuidadoseguro}?useSSL=${DB_USE_SSL:false}&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:administracion}?useSSL=${DB_USE_SSL:false}&serverTimezone=UTC&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:}
+    password: ${DB_PASSWORD:admin}
 
   jpa:
     hibernate:
@@ -19,6 +19,17 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: msal-api
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
   sql:
     init:
@@ -35,6 +46,13 @@ spring:
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:4200}
+
+  kafka:
+    topic-signos-vitales: ${KAFKA_TOPIC_SIGNOS_VITALES:signos-vitales}
+
+  notificacion:
+    service:
+      base-url: ${NOTIFICACION_SERVICE_URL:http://localhost:8089}
 
 queues:
   service:

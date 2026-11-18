@@ -16,7 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class FichaClinicaService {
 
 
-    private static final String QUEUES_SERVICE_BASE_URL = "http://cuidadoseguro-queue-cf502d50d1881b7f.elb.us-east-1.amazonaws.com:8086";
+    private static final String QUEUES_SERVICE_BASE_URL = "http://localhost:8086";
+    //private static final String QUEUES_SERVICE_BASE_URL = "http://cuidadoseguro-queue-cf502d50d1881b7f.elb.us-east-1.amazonaws.com:8086";
     private final RestClient queuesClient;
 
     // Constructor simplificado recibiendo únicamente el RestClient.Builder
