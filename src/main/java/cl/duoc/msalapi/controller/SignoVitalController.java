@@ -65,10 +65,9 @@ public class SignoVitalController {
     }
 
     private boolean puedeRegistrar(Jwt jwt) {
-        if (jwt == null) {
-            return false;
-        }
-        java.util.List<String> roles = jwt.getClaimAsStringList("roles");
-        return roles != null && (roles.contains("0") || roles.contains("1"));
+        // Cualquier usuario autenticado (paciente o profesional) puede
+        // consultar/registrar signos vitales. El rol se resuelve desde el
+        // cliente al iniciar sesión con Cognito.
+        return jwt != null;
     }
 }

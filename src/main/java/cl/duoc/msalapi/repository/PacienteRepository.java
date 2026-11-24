@@ -7,4 +7,7 @@ import cl.duoc.msalapi.entity.Paciente;
 public interface PacienteRepository extends JpaRepository<Paciente, Long> {
 
     boolean existsByRutIgnoreCase(String rut);
+    boolean existsByEmailIgnoreCase(String email);
+
+    Paciente findByEmailIgnoreCase(String email);
 }

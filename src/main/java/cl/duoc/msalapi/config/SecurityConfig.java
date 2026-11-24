@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -21,14 +22,27 @@ public class SecurityConfig {
     private List<String> allowedOrigins;
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    JwtDecoder jwtDecoder(
+            @Value("${app.security.azure.issuer-uri}") String azureIssuer,
+            @Value("${app.security.azure.client-id}") String azureClientId,
+            @Value("${app.security.cognito.issuer-uri}") String cognitoIssuer,
+            @Value("${app.security.cognito.client-id}") String cognitoClientId) {
 
+        return new MultiIssuerJwtDecoder(
+                azureIssuer,
+                azureClientId,
+                cognitoIssuer,
+                cognitoClientId
+        );
+    }
+
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/login").permitAll()
                 .requestMatchers("/public/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().denyAll()
@@ -42,38 +56,15 @@ public class SecurityConfig {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration cfg = new CorsConfiguration();
-
         cfg.setAllowedOrigins(allowedOrigins);
-
-        cfg.setAllowedMethods(
-            List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "OPTIONS"
-            )
-        );
-
-        cfg.setAllowedHeaders(
-            List.of(
-                "Authorization",
-                "Content-Type",
-                "Accept",
-                "Origin"
-            )
-        );
-
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin"));
         cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
-
         return source;
     }
 }

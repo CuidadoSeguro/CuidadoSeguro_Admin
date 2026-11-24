@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import cl.duoc.msalapi.entity.Paciente;
+import cl.duoc.msalapi.dto.CrearPacienteRequest;
+import cl.duoc.msalapi.service.CognitoPacienteService;
 import cl.duoc.msalapi.repository.PacienteRepository;
 
 @RestController
@@ -25,9 +27,11 @@ import cl.duoc.msalapi.repository.PacienteRepository;
 public class PacienteController {
 
     private final PacienteRepository repository;
+    private final CognitoPacienteService cognitoPacienteService;
 
-    public PacienteController(PacienteRepository repository) {
+    public PacienteController(PacienteRepository repository, CognitoPacienteService cognitoPacienteService) {
         this.repository = repository;
+        this.cognitoPacienteService = cognitoPacienteService;
     }
 
     @GetMapping
@@ -58,24 +62,34 @@ public class PacienteController {
     @PostMapping
     public ResponseEntity<Paciente> crear(
             @AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody Paciente paciente) {
+            @Valid @RequestBody CrearPacienteRequest solicitud) {
 
         if (!esAdmin(jwt)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        String rut = paciente.getRut().trim();
-
+        String rut = solicitud.rut().trim();
         if (repository.existsByRutIgnoreCase(rut)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ya existe un paciente registrado con ese RUT.");
+        }
+        if (repository.existsByEmailIgnoreCase(solicitud.email().trim())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ya existe un paciente registrado con ese correo.");
         }
 
-        paciente.setRut(rut);
-        Paciente guardado = repository.save(paciente);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(guardado);
+        Paciente paciente = solicitud.toPaciente();
+        // La cuenta se crea primero. Si falla la persistencia SQL, se elimina la cuenta Cognito.
+        cognitoPacienteService.crearCuenta(
+                paciente.getEmail(), paciente.getNombreCompleto(), solicitud.password());
+        try {
+            paciente.setRut(rut);
+            Paciente guardado = repository.save(paciente);
+            return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
+        } catch (RuntimeException ex) {
+            cognitoPacienteService.eliminarCuenta(paciente.getEmail());
+            throw ex;
+        }
     }
 
     @PutMapping("/{id}")

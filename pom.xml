@@ -72,6 +72,12 @@
 </dependency>
 
 <dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>cognitoidentityprovider</artifactId>
+    <version>2.30.38</version>
+</dependency>
+
+<dependency>
     <groupId>me.paulschwarz</groupId>
     <artifactId>spring-dotenv</artifactId>
     <version>4.0.0</version>

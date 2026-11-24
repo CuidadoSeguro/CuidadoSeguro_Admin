@@ -9,7 +9,7 @@ spring:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:administracion}?useSSL=${DB_USE_SSL:false}&serverTimezone=UTC&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:admin}
+    password: ${DB_PASSWORD:}
 
   jpa:
     hibernate:
@@ -35,15 +35,21 @@ spring:
     init:
       mode: ${SQL_INIT_MODE:never}
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${AZURE_ISSUER_URI:https://login.microsoftonline.com/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/v2.0}
-          audiences:
-            - ${AZURE_CLIENT_ID:00000000-0000-0000-0000-000000000000}
-
 app:
+  cognito:
+    region: ${AWS_REGION:us-east-1}
+    user-pool-id: ${COGNITO_USER_POOL_ID:us-east-1_RP2GidqrX}
+    patient-group: ${COGNITO_PATIENT_GROUP:PACIENTE}
+  security:
+    azure:
+      issuer-uri: ${AZURE_ISSUER_URI:https://login.microsoftonline.com/95cd823a-c239-4ece-b6ea-932724964971/v2.0}
+      # Application ID de la API registrada en Entra; el token debe tener aud igual al GUID o api://GUID.
+      client-id: ${AZURE_CLIENT_ID:3912eb25-8b20-4725-9b9d-18a99c419ead}
+    cognito:
+      issuer-uri: ${COGNITO_ISSUER_URI:https://cognito-idp.us-east-1.amazonaws.com/us-east-1_RP2GidqrX}
+      # Debe ser el ID del NUEVO App Client público (sin client secret), no el cliente confidencial antiguo.
+      client-id: ${COGNITO_CLIENT_ID:REEMPLAZAR_POR_APP_CLIENT_ID_PUBLICO}
+
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:4200}
 

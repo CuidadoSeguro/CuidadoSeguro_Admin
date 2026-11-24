@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import cl.duoc.msalapi.service.CognitoPacienteService.CuentaCognitoExistenteException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -30,6 +31,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+
+    @ExceptionHandler(CuentaCognitoExistenteException.class)
+    public ResponseEntity<Map<String, Object>> cuentaCognitoExistente(CuentaCognitoExistenteException ex) {
+        return build(HttpStatus.CONFLICT, ex.getMessage());
+    }
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, Object>> responseStatus(ResponseStatusException ex) {

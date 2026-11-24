@@ -11,9 +11,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class SignoVitalService {
+
+    private static final Logger log = LoggerFactory.getLogger(SignoVitalService.class);
 
     private final SignoVitalRepository repository;
     private final KafkaTemplate<String, String> kafkaTemplate;
@@ -47,7 +55,23 @@ public class SignoVitalService {
 
         try {
             String valor = objectMapper.writeValueAsString(guardado);
-            kafkaTemplate.send(topic, String.valueOf(guardado.getPacienteId()), valor);
+            String key = String.valueOf(guardado.getPacienteId());
+
+            // Espera confirmación del broker: evita informar éxito si Kafka no recibió el evento.
+            var resultado = kafkaTemplate.send(topic, key, valor)
+                    .get(10, TimeUnit.SECONDS);
+
+            log.info("[KAFKA-PUBLICADO] topic={} partition={} offset={} pacienteId={} signoId={}",
+                    topic,
+                    resultado.getRecordMetadata().partition(),
+                    resultado.getRecordMetadata().offset(),
+                    guardado.getPacienteId(),
+                    guardado.getId());
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Se interrumpió la publicación del signo vital en Kafka", ex);
+        } catch (ExecutionException | TimeoutException ex) {
+            throw new RuntimeException("Kafka no confirmó la recepción del signo vital", ex);
         } catch (Exception ex) {
             throw new RuntimeException("No se pudo publicar el signo vital a Kafka", ex);
         }

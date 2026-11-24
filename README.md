@@ -1,3 +1,7 @@
+# Cuidado Seguro — API Spring Boot con autenticación JWT dual
+
+Este backend valida Access Tokens de Microsoft Entra ID y Amazon Cognito. Consulta `SOLUCION_HTTP_401_DUAL_ISSUER.md` para configurar ambos proveedores y probar `/api/login`.
+
 # Guía práctica — API Spring Boot + JWT Entra ID (pública y privada)
 
 **Asignatura:** DSY1107 — Desarrollo Cloud Native I  

@@ -1,6 +1,7 @@
 package cl.duoc.msalapi.controller;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,17 +14,36 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class MeController {
 
-	@GetMapping("/login")
-	public Map<String, Object> me(@AuthenticationPrincipal Jwt jwt) {
-		Map<String, Object> body = new LinkedHashMap<>();
-		body.put("mensaje", "API privada: el access token es válido.");
-		body.put("sub", jwt.getSubject());
-		body.put("aud", jwt.getAudience());
-		body.put("scp", jwt.getClaimAsString("scp"));
-		body.put("preferred_username", jwt.getClaimAsString("preferred_username"));
-		body.put("oid", jwt.getClaimAsString("oid"));
-		body.put("iss", jwt.getIssuer() != null ? jwt.getIssuer().toString() : null);
-		body.put("roles",jwt.getClaim("roles"));
-		return body;
-	}
+    @GetMapping("/login")
+    public Map<String, Object> me(@AuthenticationPrincipal Jwt jwt) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("mensaje", "API privada: el access token es válido.");
+        body.put("sub", jwt.getSubject());
+        body.put("aud", jwt.getAudience());
+        body.put("scp", jwt.getClaimAsString("scp"));
+        body.put("preferred_username", firstNonNull(
+                jwt.getClaimAsString("preferred_username"),
+                jwt.getClaimAsString("username"),
+                jwt.getClaimAsString("email")
+        ));
+        body.put("oid", jwt.getClaimAsString("oid"));
+        body.put("iss", jwt.getIssuer() != null ? jwt.getIssuer().toString() : null);
+
+        Object roles = jwt.getClaims().get("roles");
+        if (!(roles instanceof List<?>)) {
+            roles = jwt.getClaims().get("cognito:groups");
+        }
+        body.put("roles", roles instanceof List<?> ? roles : List.of());
+
+        return body;
+    }
+
+    private String firstNonNull(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return null;
+    }
 }
